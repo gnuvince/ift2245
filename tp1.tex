@@ -1,0 +1,158 @@
+\documentclass{article}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}            %For \leadsto
+\usepackage{amsmath}             %For \text
+\usepackage{fancybox}            %For \ovalbox
+\usepackage[letterpaper,margin=1in,includehead]{geometry}
+
+\title{Travail pratique \#1}
+\author{IFT-2245}
+
+\begin{document}
+
+\maketitle
+
+{\centering \ovalbox{\large ¡¡ Dû le 14 février à midi !!} \\}
+
+\newcommand \uMPS {\ensuremath\mu\textsl{MPS2}}
+\newcommand \kw [1] {\textsf{#1}}
+\newcommand \id [1] {\texttt{#1}}
+\newcommand \punc [1] {\kw{`#1'}}
+\newenvironment{outitemize}{
+  \begin{itemize}
+  \let \origitem \item \def \item {\origitem[]\hspace{-18pt}}
+}{
+  \end{itemize}
+}
+
+\section{Survol}
+
+Ce TP a pour but de vous introduire au codage C sur le simulateur \uMPS, et
+de commencer le codage de votre système d'exploitation \emph{Kaya}.
+
+Les étapes sont les suivantes:
+\begin{enumerate}
+\item Lire et comprendre cette donnée.
+\item Écrire le code, le tester, le choyer, le peaufiner, ...
+\item Écrire un rapport.  Il doit décrire \textbf{votre} expérience pendant
+  les points précédents: problèmes rencontrés, surprises, choix que vous
+  avez dû faire, options que vous avez sciemment rejetées, etc...  Le
+  rapport ne doit pas excéder 4 pages.
+\end{enumerate}
+
+Ce travail est à faire en groupes de 2 étudiants.  Le rapport doit être
+écrit en \LaTeX\ (compilable sur \texttt{frontal.iro}).  Le rapport et le code
+sont à remettre par remise électronique avant la date indiquée.
+Aucun retard ne sera accepté.  Indiquez clairement vos noms au début de
+chaque fichier.
+
+Si un étudiant préfère travailler seul, libre à lui, mais l'évaluation de
+son travail n'en tiendra pas compte.  Si un étudiant ne trouve pas de
+partenaire, il doit me contacter au plus tard jeudi 2 février
+\textbf{avant} le cours.  Des groupes de 3 ou plus sont \textbf{exclus}.
+
+\section{Contexte}
+
+Dans ce cours vous allez implanter votre propre système d'exploitation,
+dénomé Kaya, écrit en C et qui roule sur l'émulateur d'architecture MIPS
+\uMPS.  Dans ce premier TP vous allez seulement écrire quelques routines
+de gestion de structures de données simples.
+
+Plus spécifiquement il faut implanter des routines de manipulation d'objets
+qui joueront le rôle (dans les TPs à venir) de processus et de sémaphores.
+Comme un noyau n'a pas accès aux facilités de la librairies standard de
+C (e.g.~\texttt{printf}, \texttt{malloc}, ...) vu que cette librairie
+a elle-même besoin d'un noyau pour lui fournir les fonctionnalités
+correspondantes, il faudra gérer la mémoire de manière statique: pour les
+processus, vous utiliserez une table préallouée de processus qui limitera
+arbitrairement le nombre maximum de processus que votre système pourra
+supporter à un moment donné; pour les sémaphores vous laisserez les
+utilisateurs des routines faire leur propre allocation.
+
+\section{Fichiers fournis}
+
+4 fichiers sont fournis qui déclarent les fonctions que vous devez implanter
+ainsi que les types des objets que vous devez utiliser pour implanter
+ces fonctions:
+\begin{itemize}
+\item \texttt{proc.h}: déclarations de fonctions de manipulation
+  de processus.
+\item \texttt{proc.c}: type de ces processus et implantation (à remplir)
+  des fonctions déclarées.
+\item \texttt{sema.h}: déclarations de fonctions de manipulation
+  de sémaphores.
+\item \texttt{sema.c}: type de ces sémaphores et implantation (à remplir)
+  des fonctions déclarées.
+\item \texttt{tp1.tex}: le code \LaTeX\ du TP, au cas où vous voudriez vous
+  en inspirer pour votre rapport.
+\end{itemize}
+
+Il y a aussi un document nommé \emph{Student Guide to the Kaya Operating
+  System} qui décrit une version antérieure de Kaya, disponible
+à \texttt{http://mps.sourceforge.net/documentation.html}, ainsi que le
+document \emph{µMPS2 Principles of Operation}, disponible à la même adresse,
+qui décrit la machine simulée par \uMPS.
+
+\section{À faire}
+
+Il vous faut faire les choses suivantes:
+\begin{itemize}
+\item Implanter les fonctions demandées dans les deux fichiers
+  \texttt{.c} fournis.
+\item Écrire un fichier \texttt{tp1test.c} qui fait divers tests (libre
+  à vous) de ces fonctions en affichant sur le terminal les succès/échecs de
+  ces tests.
+\item Écrire un fichier \texttt{Makefile} pour compiler tout ces fichiers et
+  en générer un fichier \texttt{kernel.core.umps} que l'on peut passer
+  à \uMPS.
+\item Écrire le fichier \texttt{rapport-tp1.tex}.
+\end{itemize}
+Pour \texttt{tp1test.c} et \texttt{Makefile}, je vous recommande de vous
+inspirer des fichiers de l'exemple \texttt{hello-umps}.
+
+\section{Remise}
+
+Il faudra remettre électroniquement, via la page Moodle (aussi connu sous le
+nom de StudiUM) du cours, 1 fichier au format \texttt{tar.gz} contenant
+7 fichiers (les 4 fichier C fournis, plus les 3 nouveaux).
+Indiquez clairement vos noms au début de chaque fichier.
+
+\section{Barème}
+
+Les points en jeux seront divisés comme suit:
+\begin{itemize}
+\item 50\% points pour le codages des fonctions.
+\item 20\% pour le codage du Makefile et du code de tests.
+\item 10\% pour le choix des tests.
+\item 20\% pour le rapport.
+\end{itemize}
+Les points sur le code seront pour moitié basés sur de simple tests pour
+vérifier le comportement de vos programmes et pour moitié basé sur une revue
+manuelle de code.  Les critères par ordre d'importance:
+\begin{itemize}
+\item Le code doit être correct dans tous les cas, même (surtout) les
+  plus tordus.
+\item Le code ne doit pas être excessivement lent.
+\item Coder de manière défensive: faites aussi peu d'hypothèses que
+  possible; exposer le code aussi peu que possible (par exemple, utiliser
+  \texttt{static} chaque fois que possible et garder les déclarations de
+  types dans les fichiers \texttt{.c} plutôt que \texttt{.h} lorsque c'est
+  possible).
+\item Le code doit suivre les conventions stylistiques habituelles:
+  indentation standard, ne jamais dépasser 80 colonnes, les commentaires
+  sont traités avec dignité (e.g.~ils ont droit à une majuscule au début et
+  une ponctuation à la fin), ...
+\item Si une partie du comportement n'est pas spécifiée dans la donnée, il
+  faut le mentionner dans le code et/ou le rapport et expliquer quel choix
+  vous avez fait et pourquoi.
+\item Le code doit être \emph{bien} commenté, i.e.~ni trop, ni trop peu;
+  expliquer ce que le code fait (et ne fait pas), sans le paraphraser.
+\item \emph{Faute avouée est à moitié pardonnée}: si votre code s'écarte du
+  comportement stipulé par la donnée, il est préférable de le mentionner
+  et expliquer dans le rapport, pour bien montrer que vous en êtes au
+  moins conscient.
+\end{itemize}
+
+\end{document}
