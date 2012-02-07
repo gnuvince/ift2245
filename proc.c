@@ -66,6 +66,13 @@ pcb_t *allocPcb(void) {
      * Change the head of unused pcb list to be the next free pcb. */
     p = pcb_free_h;
     pcb_free_h = pcb_free_h->p_next;
+
+    p->p_next   = NULL;
+    p->p_parent = NULL;
+    p->p_child  = NULL;
+    p->p_sib    = NULL;
+    p->p_sema   = NULL;
+
     return p;
 }
 
@@ -92,16 +99,13 @@ void insertProcQ(pcbq_t **pqp, pcb_t *p) {
     if (pqp == NULL) {
         return;
     }
-    else if (*pqp == NULL) {
+    else if (emptyProcQ(*pqp)) {
         p->p_next = p;
         *pqp = p;
     }
     else {
-        pcb_t *last = *pqp;
-        while (last->p_next != *pqp)
-            last = last->p_next;
-        last->p_next = p;
-        p->p_next = *pqp;
+        p->p_next = (*pqp)->p_next;
+        (*pqp)->p_next = p;
     }
 }
 
@@ -119,7 +123,7 @@ pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
     pcb_t *curr = *pqp;
     int looped = 0;
 
-    if (pqp == NULL || *pqp == NULL || p == NULL)
+    if (pqp == NULL || emptyProcQ(*pqp) || p == NULL)
         return NULL;
 
     /* Try to find p in pqp. */
@@ -140,7 +144,7 @@ pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
     /* Update the queue. */
     if (curr == prev) {
         /* Queue has a single element. */
-        *pqp = NULL;
+        *pqp = mkEmptyProcQ();
     }
     else {
         prev->p_next = p->p_next;
