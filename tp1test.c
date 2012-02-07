@@ -93,10 +93,49 @@ int test_allocFreeNull(void) {
 
 
 
-int testEmptyProcQ(void) {
+int test_EmptyProcQ(void) {
     int success = 1;
+    pcb_t *p;
+    pcbq_t *q;
+
+    initProc();
 
     success &= emptyProcQ(NULL);
+
+    q = mkEmptyProcQ();
+    success &= emptyProcQ(q);
+
+    p = allocPcb();
+    insertProcQ(&q, p);
+    success &= !emptyProcQ(q);
+    success &= getPNext(p) == p;
+    removeProcQ(&q);
+    success &= emptyProcQ(q);
+
+    return success;
+}
+
+
+int test_insertProcQ(void) {
+    int success = 1;
+    int i;
+    pcbq_t *q = mkEmptyProcQ();
+
+    initProc();
+
+    success &= emptyProcQ(q);
+    insertProcQ(&q, NULL);
+    success &= emptyProcQ(q);
+
+    for (i = 0; i < 3; ++i) {
+        insertProcQ(&q, allocPcb());
+    }
+
+    for (i = 0; i < 3; ++i) {
+        success &= removeProcQ(&q) != NULL;
+    }
+    success &= !removeProcQ(&q);
+
 
     return success;
 }
@@ -107,7 +146,8 @@ int main(void) {
     test("test_initProc", test_initProc);
     test("test_allocFreeCount", test_allocFreeCount);
     test("test_allocFreeNull", test_allocFreeNull);
-    test("testEmptyProcQ", testEmptyProcQ);
+    test("test_EmptyProcQ", test_EmptyProcQ);
+    test("test_insertProcQ", test_insertProcQ);
 
     return 0;
 }

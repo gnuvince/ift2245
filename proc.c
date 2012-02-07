@@ -106,7 +106,7 @@ int emptyProcQ(pcbq_t *pq) {
  * the process pointing to itself, otherwise the process will insert
  * itself between the tail and its previous neighbor. */
 void insertProcQ(pcbq_t **pqp, pcb_t *p) {
-    if (pqp == NULL) {
+    if (pqp == NULL || p == NULL) {
         return;
     }
     else if (emptyProcQ(*pqp)) {
@@ -133,7 +133,7 @@ pcb_t *removeProcQ(pcbq_t **pqp) {
 /* Remove a given pcb from the pcb queue.  Return null if pcb does not
  * exist. */
 pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
-    pcb_t *prev = NULL;
+    pcb_t *prev = *pqp;
     pcb_t *curr = *pqp;
 
     if (pqp == NULL || emptyProcQ(*pqp) || p == NULL)
@@ -149,6 +149,7 @@ pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
             return NULL;
     }
 
+
     /* Get the element before p. */
     while (prev->p_next != p)
         prev = prev->p_next;
@@ -160,6 +161,7 @@ pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
     }
     else {
         prev->p_next = p->p_next;
+        *pqp = prev;
     }
 
     return p;

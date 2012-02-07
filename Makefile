@@ -1,6 +1,6 @@
 CC=gcc
 FLAGS=-Wall -Wextra -c -std=c89
-DEBUG_FLAGS=${FLAGS} -DDEBUG
+DEBUG_FLAGS=${FLAGS} -DDEBUG -g
 
 all:
 	${CC} ${FLAGS} proc.c
