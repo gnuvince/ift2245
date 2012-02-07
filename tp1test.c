@@ -92,10 +92,22 @@ int test_allocFreeNull(void) {
 }
 
 
+
+int testEmptyProcQ(void) {
+    int success = 1;
+
+    success &= emptyProcQ(NULL);
+
+    return success;
+}
+
+
+
 int main(void) {
     test("test_initProc", test_initProc);
     test("test_allocFreeCount", test_allocFreeCount);
     test("test_allocFreeNull", test_allocFreeNull);
+    test("testEmptyProcQ", testEmptyProcQ);
 
     return 0;
 }
