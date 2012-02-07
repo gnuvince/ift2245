@@ -14,6 +14,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 #define NULL (void*)(0)
 
+
 /* The type of process objects.  */
 typedef struct pcb pcb_t;
 /* Process queues are represented by one of their members.  */
@@ -72,5 +73,18 @@ pcb_t *removeChild (pcb_t *p);
 /* Make the process `p' no longer the child of its parent.
    If the process `p' has no parent, return NULL; otherwise, return `p'.  */
 pcb_t *outChild (pcb_t *p);
+
+
+
+
+#ifdef DEBUG
+
+pcb_t *getFreeProcess(int);
+int getMaxProcess(void);
+
+#endif
+
+
+
 
 #endif

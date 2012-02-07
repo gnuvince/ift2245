@@ -42,6 +42,10 @@ static pcb_t PROCESS_POOL[MAXPROC];
 /* Pointer to the head of free (unused) pcb linked list. */
 static pcb_t *pcb_free_h;
 
+
+
+
+
 /* Create the linked list of unused pcb's.' */
 void initProc (void) {
     int i;
@@ -49,10 +53,13 @@ void initProc (void) {
     for (i = 0; i < MAXPROC-1; ++i)
         PROCESS_POOL[i].p_next = &PROCESS_POOL[i+1];
     PROCESS_POOL[MAXPROC-1].p_next = NULL;
+    pcb_free_h = &PROCESS_POOL[0];
 }
 
 /* Return a pcb to the unused pcb list */
 void freePcb(pcb_t *p) {
+    if (p == NULL)
+        return;
     p->p_next = pcb_free_h;
     pcb_free_h = p;
 }
@@ -213,3 +220,33 @@ pcb_t *outChild(pcb_t *p) {
         return p;
     }
 }
+
+
+
+
+/* Functions for debugging and testing. */
+#ifdef DEBUG
+
+pcb_t *getFreeProcess(int i) {
+    if (i < 0 || i >= MAXPROC)
+        return NULL;
+    return &PROCESS_POOL[i];
+}
+
+
+pcb_t *getPNext(pcb_t *p) { return p->p_next; }
+pcb_t *getPParent(pcb_t *p) { return p->p_parent; }
+pcb_t *getPChild(pcb_t *p) { return p->p_child; }
+pcb_t *getPSib(pcb_t *p) { return p->p_sib; }
+pcb_t *getPSema(pcb_t *p) { return p->p_sema; }
+int getFreeProcessCount(void) {
+    int count = 0;
+    pcb_t *curr = pcb_free_h;
+    while (curr != NULL) {
+        count++;
+        curr = curr->p_next;
+    }
+    return count;
+}
+
+#endif
