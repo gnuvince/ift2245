@@ -1,17 +1,20 @@
+/* Vincent Foley-Bourgon (FOLV08078309)
+ * Eric Thivierge        (THIE09016601) */
+
 /* proc.c --- Functions to manipulate processes.
 
-This file is part of Kaya OS.
-Kaya OS is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
+   This file is part of Kaya OS.
+   Kaya OS is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
 
 #include "proc.h"
 #include "sema.h"
 
 /* Since we don't have the C library at hand, we don't have malloc and
-	friends, so we will have to make do with a hardcoded limit on the maximum
-	number of processes.  */
+   friends, so we will have to make do with a hardcoded limit on the maximum
+   number of processes.  */
 #define MAXPROC 20
 
 /* Process Control Block.  */
@@ -109,6 +112,8 @@ void insertProcQ(pcbq_t **pqp, pcb_t *p) {
     }
 }
 
+
+/* To remove the head from a queue, call outProcQ. */
 pcb_t *removeProcQ(pcbq_t **pqp) {
     if (pqp == NULL)
         return NULL;
@@ -118,24 +123,24 @@ pcb_t *removeProcQ(pcbq_t **pqp) {
 
 
 
+/* Remove a given pcb from the pcb queue.  Return null if pcb does not
+ * exist. */
 pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
     pcb_t *prev = NULL;
     pcb_t *curr = *pqp;
-    int looped = 0;
 
     if (pqp == NULL || emptyProcQ(*pqp) || p == NULL)
         return NULL;
 
     /* Try to find p in pqp. */
-    while (curr != p && !looped) {
+    while (curr != p) {
         curr = curr->p_next;
-        if (curr == *pqp)
-            looped = 1;
-    }
 
-    /* If we went around the queue and didn't find p, return NULL. */
-    if (looped)
-        return NULL;
+        /* If curr == *pqp, then we have looped and p is not in
+         * pqp. */
+        if (curr == *pqp)
+            return NULL;
+    }
 
     /* Get the element before p. */
     while (prev->p_next != p)
@@ -154,9 +159,57 @@ pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
 }
 
 
+/* Return the next element to be popped from the list. */
 pcb_t *headProcQ(pcbq_t *pq) {
     if (pq == NULL)
         return NULL;
     else
         return pq;
+}
+
+
+/* Return TRUE iff the process `p' has no children.  */
+int emptyChild(pcb_t *p) {
+    return p != NULL && p->p_child != NULL;
+}
+
+
+void insertChild(pcb_t *parent, pcb_t *child) {
+    if (parent == NULL || child == NULL || child->p_parent != NULL)
+        return;
+
+    if (parent->p_child != NULL) {
+        child->p_sib = parent->p_child;
+    }
+
+    child->p_parent = parent;
+    parent->p_child = child;
+}
+
+
+pcb_t *outChild(pcb_t *p) {
+    pcb_t *prev;
+
+    if (p == NULL || p->p_parent == NULL)
+        return NULL;
+
+
+    if (p->p_parent->p_child == p) {
+        p->p_parent->p_child = NULL;
+        p->p_parent = NULL;
+        return p;
+    }
+    else {
+        prev = p->p_parent->p_child;
+        while (prev->p_sib != NULL || prev->p_sib != p)
+            prev = prev->p_sib;
+
+        if (prev->p_sib == NULL) {
+            return NULL;
+        }
+
+        p->p_parent = NULL;
+        prev->p_sib = p->p_sib;
+        return p;
+    }
 }

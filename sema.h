@@ -1,3 +1,6 @@
+/* Vincent Foley-Bourgon (FOLV08078309)
+ * Eric Thivierge        (THIE09016601) */
+
 /* sema.h --- Functions to manipulate semaphores.
 
 This file is part of Kaya OS.
