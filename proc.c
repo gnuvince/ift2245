@@ -177,10 +177,11 @@ pcb_t *headProcQ(pcbq_t *pq) {
 
 /* Return TRUE iff the process `p' has no children.  */
 int emptyChild(pcb_t *p) {
-    return p != NULL && p->p_child != NULL;
+    return p != NULL && p->p_child == NULL;
 }
 
 
+/* Insert a new child at the head of the list of children of parent. */
 void insertChild(pcb_t *parent, pcb_t *child) {
     if (parent == NULL || child == NULL || child->p_parent != NULL)
         return;
@@ -193,6 +194,27 @@ void insertChild(pcb_t *parent, pcb_t *child) {
     parent->p_child = child;
 }
 
+
+/* Remove the first child of p.  If this child has children, remove
+ * them all (apply this operation recursively).*/
+pcb_t *removeChild(pcb_t *p) {
+    pcb_t *child;
+
+    if (p == NULL || emptyChild(p))
+        return NULL;
+
+
+    child = p->p_child;
+    p->p_child = child->p_sib;
+    child->p_parent = NULL;
+    child->p_sib = NULL;
+
+    /* If child has children of his own, remove them. */
+    while (!emptyChild(child))
+        removeChild(child);
+
+    return child;
+}
 
 pcb_t *outChild(pcb_t *p) {
     pcb_t *prev;

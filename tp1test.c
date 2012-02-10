@@ -219,6 +219,64 @@ int test_headProcQ(void) {
 
 
 
+int test_emptyChild(void) {
+    int success = 1;
+    pcb_t *p1, *p2;
+
+    initProc();
+    p1 = allocPcb();
+    p2 = allocPcb();
+
+    success &= !emptyChild(NULL);
+    success &= emptyChild(p1);
+    success &= emptyChild(p2);
+
+    insertChild(p1, p2);
+    success &= !emptyChild(p1);
+    removeChild(p1);
+    success &= emptyChild(p1);
+
+    return success;
+}
+
+
+
+int test_removeChild(void) {
+    int success = 1;
+    pcb_t *p1, *p2, *p3, *p4, *p5;
+
+    initProc();
+    p1 = allocPcb();
+    p2 = allocPcb();
+    p3 = allocPcb();
+    p4 = allocPcb();
+    p5 = allocPcb();
+
+    success &= removeChild(NULL) == NULL;
+    success &= removeChild(p1) == NULL;
+
+    insertChild(p1, p2);
+    insertChild(p1, p3);
+    success &= removeChild(p1) == p3;
+    success &= removeChild(p1) == p2;
+    success &= removeChild(p1) == NULL;
+
+    insertChild(p1, p2);
+    insertChild(p2, p3);
+    insertChild(p2, p4);
+    insertChild(p4, p5);
+    success &= removeChild(p1) == p2;
+    success &= emptyChild(p2);
+    success &= emptyChild(p3);
+    success &= emptyChild(p4);
+    success &= emptyChild(p5);
+
+    return success;
+}
+
+
+
+
 int main(void) {
     test("test_initProc", test_initProc);
     test("test_allocFreeCount", test_allocFreeCount);
@@ -228,6 +286,8 @@ int main(void) {
     test("test_removeProcQ", test_removeProcQ);
     test("test_outProcQ", test_outProcQ);
     test("test_headProcQ", test_headProcQ);
+    test("test_emptyChild", test_emptyChild);
+    test("test_removeChild", test_removeChild);
 
     return 0;
 }
