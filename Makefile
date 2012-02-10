@@ -4,6 +4,7 @@ DEBUG_FLAGS=${FLAGS} -DDEBUG -g
 
 all:
 	${CC} ${FLAGS} proc.c
+	${CC} ${FLAGS} sema.c
 
 test:
 	${CC} ${DEBUG_FLAGS} proc.c

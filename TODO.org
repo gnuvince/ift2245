@@ -1,0 +1,11 @@
+- [ ] test pour outProcQ
+- [ ] test pour fonctions parents/enfants
+- [ ] implantation de sema.c
+- [ ] compilation sur uMPS
+- [ ] rapport
+  - [ ] On ne peut insérer un child à un parent s'il a déjà un parent
+  - [ ] implanter removeProcQ en fct de outProcQ
+  - [ ] pas utiliser liste doublement chaînée pour queue (donc
+    suppression en O(n)).
+  - [ ] Valeur initiale des champs des pcb indéfinie (sauf p_next)
+  - [ ] tests

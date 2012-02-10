@@ -127,15 +127,92 @@ int test_insertProcQ(void) {
     insertProcQ(&q, NULL);
     success &= emptyProcQ(q);
 
-    for (i = 0; i < 3; ++i) {
+    for (i = 0; i < MAXPROCESS; ++i) {
         insertProcQ(&q, allocPcb());
     }
 
-    for (i = 0; i < 3; ++i) {
+    for (i = 0; i < MAXPROCESS; ++i) {
         success &= removeProcQ(&q) != NULL;
     }
     success &= !removeProcQ(&q);
 
+
+    return success;
+}
+
+
+int test_removeProcQ(void) {
+    int success = 1;
+    pcb_t *p1, *p2;
+    pcbq_t *q;
+
+    initProc();
+    p1 = allocPcb();
+    p2 = allocPcb();
+    q = mkEmptyProcQ();
+
+    success &= removeProcQ(NULL) == NULL;
+
+    insertProcQ(&q, p1);
+    success &= !emptyProcQ(q);
+    success &= removeProcQ(&q) == p1;
+    success &= emptyProcQ(q);
+
+    insertProcQ(&q, p1);
+    insertProcQ(&q, p2);
+    success &= removeProcQ(&q) == p1;
+    success &= removeProcQ(&q) == p2;
+
+    return success;
+}
+
+
+int test_outProcQ(void) {
+    int success = 1;
+    pcb_t *p1, *p2, *p3;
+    pcbq_t *q;
+
+    initProc();
+    q = mkEmptyProcQ();
+    p1 = allocPcb();
+    p2 = allocPcb();
+    p3 = allocPcb();
+
+    success &= outProcQ(NULL, p1) == NULL;
+    success &= outProcQ(&q, NULL) == NULL;
+    success &= outProcQ(&q, p1) == NULL;
+    success &= outProcQ(&q, p2) == NULL;
+    success &= outProcQ(&q, p3) == NULL;
+
+    insertProcQ(&q, p1);
+    insertProcQ(&q, p2);
+    success &= outProcQ(&q, p3) == NULL;
+    insertProcQ(&q, p3);
+    success &= outProcQ(&q, p3) == p3;
+    success &= outProcQ(&q, p1) == p1;
+    success &= removeProcQ(&q) == p2;
+
+    return success;
+}
+
+
+int test_headProcQ(void) {
+    int success = 1;
+    pcb_t *p1, *p2;
+    pcbq_t *q;
+
+    initProc();
+    q = mkEmptyProcQ();
+    p1 = allocPcb();
+    p2 = allocPcb();
+
+    success &= headProcQ(q) == NULL;
+    insertProcQ(&q, p1);
+    success &= headProcQ(q) == p1;
+    insertProcQ(&q, p2);
+    success &= headProcQ(q) == p1;
+    outProcQ(&q, p1);
+    success &= headProcQ(q) == p2;
 
     return success;
 }
@@ -148,6 +225,9 @@ int main(void) {
     test("test_allocFreeNull", test_allocFreeNull);
     test("test_EmptyProcQ", test_EmptyProcQ);
     test("test_insertProcQ", test_insertProcQ);
+    test("test_removeProcQ", test_removeProcQ);
+    test("test_outProcQ", test_outProcQ);
+    test("test_headProcQ", test_headProcQ);
 
     return 0;
 }

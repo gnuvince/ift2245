@@ -12,23 +12,18 @@
 #include "proc.h"
 #include "sema.h"
 
-/* Since we don't have the C library at hand, we don't have malloc and
-   friends, so we will have to make do with a hardcoded limit on the maximum
-   number of processes.  */
-#define MAXPROC 20
-
 /* Process Control Block.  */
 struct pcb {
-	/* Process queue fields.  */
-	pcb_t	*p_next;					  /* Pointer to next entry.  */
+    /* Process queue fields.  */
+    pcb_t   *p_next;                      /* Pointer to next entry.  */
 
-	/* Process tree fields.  */
-	pcb_t	*p_parent;				  /* Pointer to parent.  */
-	pcb_t *p_child;               /* Pointer to first child.  */
-    pcb_t *p_sib;                     /* Pointer to sibling.  */
+    /* Process tree fields.  */
+    pcb_t   *p_parent;                /* Pointer to parent.  */
+    pcb_t   *p_child;               /* Pointer to first child.  */
+    pcb_t   *p_sib;                     /* Pointer to sibling.  */
 
     /* Semaphore fields.  */
-    semd_t *p_sema;  /* Pointer to semaphore on which process is blocked.  */
+    semd_t  *p_sema;  /* Pointer to semaphore on which process is blocked.  */
 
     /* ...other fields will come later... */
 };
@@ -133,11 +128,14 @@ pcb_t *removeProcQ(pcbq_t **pqp) {
 /* Remove a given pcb from the pcb queue.  Return null if pcb does not
  * exist. */
 pcb_t *outProcQ(pcbq_t **pqp, pcb_t *p) {
-    pcb_t *prev = *pqp;
-    pcb_t *curr = *pqp;
+    pcb_t *prev;
+    pcb_t *curr;
 
     if (pqp == NULL || emptyProcQ(*pqp) || p == NULL)
         return NULL;
+
+    prev = *pqp;
+    curr = *pqp;
 
     /* Try to find p in pqp. */
     while (curr != p) {

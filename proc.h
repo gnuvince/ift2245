@@ -14,6 +14,11 @@ the Free Software Foundation, either version 3 of the License, or
 
 #define NULL (void*)(0)
 
+/* Since we don't have the C library at hand, we don't have malloc and
+   friends, so we will have to make do with a hardcoded limit on the maximum
+   number of processes.  */
+#define MAXPROC 20
+
 
 /* The type of process objects.  */
 typedef struct pcb pcb_t;
