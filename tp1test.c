@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "proc.h"
+#include "sema.h"
 
 #define MAXPROCESS 20
 
@@ -307,6 +308,193 @@ int test_outChild(void) {
 }
 
 
+
+int test_initASL(void) {
+    int i;
+    int success = 1;
+    semd_t *s1, *s2;
+
+    initASL();
+
+    for (i = 0; i < MAXPROCESS-1; ++i) {
+        s1 = getSema(i);
+        s2 = getSema(i+1);
+
+        success &= getSNext(s1) == s2;
+        success &= getSValue(s1) == 0;
+        success &= emptyProcQ(getSProcQ(s1));
+    }
+    s1 = getSema(MAXPROCESS - 1);
+    success &= getSNext(s1) == NULL;
+
+    success &= getSemdFree() == getSema(0);
+
+    return success;
+}
+
+
+int test_initSemD(void) {
+    int success = 1;
+    semd_t *s1;
+
+    initASL();
+
+    s1 = getSema(0);
+    success &= getSValue(s1) == 0;
+    initSemD(s1, 42);
+    success &= getSValue(s1) == 42;
+
+    return success;
+}
+
+
+int test_insertBlocked(void) {
+    int success = 1;
+    semd_t *s1, *s2, *s3;
+    pcb_t *p1, *p2, *p3;
+
+    initASL();
+    initProc();
+
+    s1 = getSema(0); initSemD(s1, 1);
+    s2 = getSema(1); initSemD(s2, 2);
+    s3 = getSema(12); initSemD(s3, 3);
+
+    p1 = allocPcb();
+    p2 = allocPcb();
+    p3 = allocPcb();
+
+    success &= getASL() == NULL;
+    insertBlocked(NULL, p1);
+    success &= getASL() == NULL;
+    insertBlocked(s1, NULL);
+    success &= getASL() == NULL;
+
+    insertBlocked(s2, p2);
+    success &= !emptyProcQ(getSProcQ(s2));
+    success &= getASL() == s2;
+
+    insertBlocked(s3, p3);
+    success &= !emptyProcQ(getSProcQ(s3));
+    success &= getASL() == s2;
+    success &= getSNext(s2) == s3;
+
+    insertBlocked(s1, p1);
+    success &= !emptyProcQ(getSProcQ(s1));
+    success &= getASL() == s1;
+    success &= getSNext(s1) == s2;
+
+    return success;
+}
+
+
+int test_removeBlocked(void) {
+    int success = 1;
+    semd_t *s1, *s2;
+    pcb_t *p1, *p2, *p3;
+
+
+    initASL();
+    initProc();
+
+    s1 = getSema(0); initSemD(s1, 1);
+    s2 = getSema(1); initSemD(s2, 2);
+
+    p1 = allocPcb();
+    p2 = allocPcb();
+    p3 = allocPcb();
+
+
+    insertBlocked(s1, p1);
+    insertBlocked(s2, p2);
+    insertBlocked(s1, p3);
+
+    success &= removeBlocked(NULL) == NULL;
+
+    success &= getSNext(s1) == s2;
+    success &= removeBlocked(s2) == p2;
+    success &= getSNext(s1) == NULL;
+
+    success &= removeBlocked(s1) == p1;
+    success &= removeBlocked(s1) == p3;
+    success &= getASL() == NULL;
+
+    return success;
+}
+
+int test_outBlocked(void) {
+    int success = 1;
+    semd_t *s1, *s2;
+    pcb_t *p1, *p2, *p3;
+
+
+    initASL();
+    initProc();
+
+    s1 = getSema(0); initSemD(s1, 1);
+    s2 = getSema(1); initSemD(s2, 2);
+
+    p1 = allocPcb();
+    p2 = allocPcb();
+    p3 = allocPcb();
+
+
+    insertBlocked(s1, p1);
+    insertBlocked(s2, p2);
+    insertBlocked(s1, p3);
+
+    success &= outBlocked(NULL) == NULL;
+
+    success &= getSNext(s1) == s2;
+    success &= removeBlocked(p2) == p2;
+    success &= getSNext(s1) == NULL;
+
+    success &= removeBlocked(s1) == p1;
+    success &= getASL() == s1;
+    success &= removeBlocked(p3) == p3;
+    success &= getASL() == NULL;
+
+    return success;
+}
+
+
+int test_headBlocked(void) {
+    int success = 1;
+    semd_t *s1, *s2;
+    pcb_t *p1, *p2, *p3;
+
+
+    initASL();
+    initProc();
+
+    s1 = getSema(0); initSemD(s1, 1);
+    s2 = getSema(1); initSemD(s2, 2);
+
+    p1 = allocPcb();
+    p2 = allocPcb();
+    p3 = allocPcb();
+
+
+    success &= headBlocked(NULL) == NULL;
+    success &= headBlocked(s1) == NULL;
+    success &= headBlocked(s2) == NULL;
+
+    insertBlocked(s1, p1);
+    insertBlocked(s2, p2);
+    insertBlocked(s1, p3);
+
+    success &= headBlocked(s1) == p1;
+    success &= headBlocked(s2) == p2;
+    outBlocked(p1);
+    success &= headBlocked(s1) == p3;
+
+    return success;
+}
+
+
+
+
+
 int main(void) {
     test("test_initProc", test_initProc);
     test("test_allocFreeCount", test_allocFreeCount);
@@ -319,6 +507,13 @@ int main(void) {
     test("test_emptyChild", test_emptyChild);
     test("test_removeChild", test_removeChild);
     test("test_outChild", test_outChild);
+
+    test("test_initASL", test_initASL);
+    test("test_initSemD", test_initSemD);
+    test("test_insertBlocked", test_insertBlocked);
+    test("test_removeBlocked", test_removeBlocked);
+    test("test_outBlocked", test_removeBlocked);
+    test("test_headBlocked", test_removeBlocked);
 
     return 0;
 }
