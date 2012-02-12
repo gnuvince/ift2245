@@ -119,7 +119,7 @@ pcb_t *removeBlocked (semd_t *s) {
     pcb_t *p = removeProcQ(&s->s_procQ);
 
     /* Remove s from ASL if its procQ is now empty. */
-    if (emptyProcQ(s->s_procQ)) {
+    if (inList(s, ASL) && emptyProcQ(s->s_procQ)) {
         semd_t *curr = ASL;
         semd_t *prev = NULL;
         while (curr != NULL && curr != s) {
@@ -167,7 +167,7 @@ pcb_t *outBlocked (pcb_t *p) {
 
     /* Remove p's containing semaphore from ASL if its procQ is now empty. */
     if (ret != NULL) {
-        if (emptyProcQ(curr->s_procQ)) {
+        if (inList(curr, ASL) && emptyProcQ(curr->s_procQ)) {
             if (prev == NULL) {
                 ASL = curr->s_next;
             }
