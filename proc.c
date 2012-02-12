@@ -186,6 +186,7 @@ void insertChild(pcb_t *parent, pcb_t *child) {
     if (parent == NULL || child == NULL || child->p_parent != NULL)
         return;
 
+    /* Child is added at the beginning of the siblings list. */
     if (parent->p_child != NULL) {
         child->p_sib = parent->p_child;
     }
@@ -216,6 +217,8 @@ pcb_t *removeChild(pcb_t *p) {
     return child;
 }
 
+
+/* Remove a process p from the process tree.  Remove its children. */
 pcb_t *outChild(pcb_t *p) {
     pcb_t *prev;
 
@@ -223,14 +226,21 @@ pcb_t *outChild(pcb_t *p) {
         return NULL;
 
 
+    /* Remove p's children. */
+    while (!emptyChild(p))
+        removeChild(p);
+
+
+    /* Child is the first sibling. */
     if (p->p_parent->p_child == p) {
-        p->p_parent->p_child = NULL;
+        p->p_parent->p_child = p->p_sib;
         p->p_parent = NULL;
         return p;
     }
+    /* Child is somewhere in the list of siblings. */
     else {
         prev = p->p_parent->p_child;
-        while (prev->p_sib != NULL || prev->p_sib != p)
+        while (prev->p_sib != NULL && prev->p_sib != p)
             prev = prev->p_sib;
 
         if (prev->p_sib == NULL) {

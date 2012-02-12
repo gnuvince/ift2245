@@ -275,6 +275,36 @@ int test_removeChild(void) {
 }
 
 
+int test_outChild(void) {
+    int success = 1;
+    pcb_t *p1, *p2, *p3, *p4, *p5;
+
+    initProc();
+    p1 = allocPcb();
+    p2 = allocPcb();
+    p3 = allocPcb();
+    p4 = allocPcb();
+    p5 = allocPcb();
+
+    success &= outChild(NULL) == NULL;
+    success &= outChild(p1) == NULL;
+
+    insertChild(p1, p2);
+    insertChild(p1, p3);
+    insertChild(p3, p4);
+    insertChild(p1, p5);
+
+    success &= outChild(p3) == p3;
+    success &= emptyChild(p3);
+    success &= getPSib(p5) == p2;
+    success &= getPSib(p2) == NULL;
+
+    success &= outChild(p5) == p5;
+    success &= getPChild(p1) == p2;
+    success &= getPSib(p2) == NULL;
+
+    return success;
+}
 
 
 int main(void) {
@@ -288,6 +318,7 @@ int main(void) {
     test("test_headProcQ", test_headProcQ);
     test("test_emptyChild", test_emptyChild);
     test("test_removeChild", test_removeChild);
+    test("test_outChild", test_outChild);
 
     return 0;
 }
