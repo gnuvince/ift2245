@@ -258,7 +258,6 @@ pcb_t *outChild(pcb_t *p) {
 
 /* Functions for debugging and testing. */
 #ifdef DEBUG
-
 pcb_t *getFreeProcess(int i) {
     if (i < 0 || i >= MAXPROC)
         return NULL;
@@ -266,11 +265,11 @@ pcb_t *getFreeProcess(int i) {
 }
 
 
-pcb_t *getPNext(pcb_t *p) { return p->p_next; }
-pcb_t *getPParent(pcb_t *p) { return p->p_parent; }
-pcb_t *getPChild(pcb_t *p) { return p->p_child; }
-pcb_t *getPSib(pcb_t *p) { return p->p_sib; }
-pcb_t *getPSema(pcb_t *p) { return p->p_sema; }
+pcb_t  *getPNext(pcb_t *p) { return p->p_next; }
+pcb_t  *getPParent(pcb_t *p) { return p->p_parent; }
+pcb_t  *getPChild(pcb_t *p) { return p->p_child; }
+pcb_t  *getPSib(pcb_t *p) { return p->p_sib; }
+semd_t *getPSema(pcb_t *p) { return p->p_sema; }
 int getFreeProcessCount(void) {
     int count = 0;
     pcb_t *curr = pcb_free_h;

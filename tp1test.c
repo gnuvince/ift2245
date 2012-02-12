@@ -313,6 +313,7 @@ int test_initASL(void) {
     int i;
     int success = 1;
     semd_t *s1, *s2;
+    pcbq_t *q;
 
     initASL();
 
@@ -322,7 +323,8 @@ int test_initASL(void) {
 
         success &= getSNext(s1) == s2;
         success &= getSValue(s1) == 0;
-        success &= emptyProcQ(getSProcQ(s1));
+        q = getSProcQ(s1);
+        success &= emptyProcQ(q);
     }
     s1 = getSema(MAXPROCESS - 1);
     success &= getSNext(s1) == NULL;
@@ -352,6 +354,7 @@ int test_insertBlocked(void) {
     int success = 1;
     semd_t *s1, *s2, *s3;
     pcb_t *p1, *p2, *p3;
+    pcbq_t *q;
 
     initASL();
     initProc();
@@ -371,16 +374,19 @@ int test_insertBlocked(void) {
     success &= getASL() == NULL;
 
     insertBlocked(s2, p2);
-    success &= !emptyProcQ(getSProcQ(s2));
+    q = getSProcQ(s2);
+    success &= !emptyProcQ(q);
     success &= getASL() == s2;
 
     insertBlocked(s3, p3);
-    success &= !emptyProcQ(getSProcQ(s3));
+    q = getSProcQ(s3);
+    success &= !emptyProcQ(q);
     success &= getASL() == s2;
     success &= getSNext(s2) == s3;
 
     insertBlocked(s1, p1);
-    success &= !emptyProcQ(getSProcQ(s1));
+    q = getSProcQ(s1);
+    success &= !emptyProcQ(q);
     success &= getASL() == s1;
     success &= getSNext(s1) == s2;
 
@@ -413,10 +419,12 @@ int test_removeBlocked(void) {
 
     success &= getSNext(s1) == s2;
     success &= removeBlocked(s2) == p2;
+    success &= getSemdFree() == s2;
     success &= getSNext(s1) == NULL;
 
     success &= removeBlocked(s1) == p1;
     success &= removeBlocked(s1) == p3;
+    success &= getSemdFree() == s1;
     success &= getASL() == NULL;
 
     return success;
@@ -446,12 +454,14 @@ int test_outBlocked(void) {
     success &= outBlocked(NULL) == NULL;
 
     success &= getSNext(s1) == s2;
-    success &= removeBlocked(p2) == p2;
+    success &= removeBlocked(s2) == p2;
+    success &= getSemdFree() == s2;
     success &= getSNext(s1) == NULL;
 
     success &= removeBlocked(s1) == p1;
     success &= getASL() == s1;
-    success &= removeBlocked(p3) == p3;
+    success &= removeBlocked(s1) == p3;
+    success &= getSemdFree() == s1;
     success &= getASL() == NULL;
 
     return success;

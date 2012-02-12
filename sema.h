@@ -44,4 +44,16 @@ pcb_t *outBlocked (pcb_t *p);
    the semaphore `s'.  Return NULL if `s' is not active.  */
 pcb_t *headBlocked (semd_t *s);
 
+
+
+#ifdef DEBUG
+semd_t *getSema(int);
+semd_t *getASL(void);
+semd_t *getSemdFree(void);
+semd_t *getSNext(semd_t *);
+int getSValue(semd_t *);
+pcbq_t *getSProcQ(semd_t *);
+#endif
+
+
 #endif

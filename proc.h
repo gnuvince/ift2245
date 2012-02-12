@@ -12,7 +12,7 @@ the Free Software Foundation, either version 3 of the License, or
 #ifndef PROC_H
 #define PROC_H
 
-#define NULL (void*)(0)
+#define NULL ((void*)(0))
 
 /* Since we don't have the C library at hand, we don't have malloc and
    friends, so we will have to make do with a hardcoded limit on the maximum
@@ -24,6 +24,8 @@ the Free Software Foundation, either version 3 of the License, or
 typedef struct pcb pcb_t;
 /* Process queues are represented by one of their members.  */
 typedef pcb_t pcbq_t;
+
+typedef struct semd semd_t;
 
 /****** General creation destruction of process objects.  ******/
 
@@ -86,6 +88,14 @@ pcb_t *outChild (pcb_t *p);
 
 pcb_t *getFreeProcess(int);
 int getMaxProcess(void);
+pcb_t *getFreeProcess(int);
+pcb_t *getPNext(pcb_t *);
+pcb_t *getPParent(pcb_t *);
+pcb_t *getPChild(pcb_t *);
+pcb_t *getPSib(pcb_t *);
+semd_t *getPSema(pcb_t *);
+int getFreeProcessCount(void);
+
 
 #endif
 

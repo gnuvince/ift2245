@@ -118,6 +118,10 @@ pcb_t *removeBlocked (semd_t *s) {
         else if (curr != NULL) {
             prev->s_next = curr->s_next;
         }
+
+        /* Return s to the semdFree list. */
+        curr->s_next = semdFree;
+        semdFree = curr;
     }
 
     return p;
@@ -143,7 +147,7 @@ pcb_t *outBlocked (pcb_t *p) {
             prev = prev->s_next;
     }
 
-    /* Remove p's containing semaphore if its procQ is now empty. */
+    /* Remove p's containing semaphore from ASL if its procQ is now empty. */
     if (ret != NULL) {
         if (emptyProcQ(curr->s_procQ)) {
             if (prev == NULL) {
@@ -153,6 +157,7 @@ pcb_t *outBlocked (pcb_t *p) {
                 prev->s_next = curr->s_next;
             }
         }
+        semdFree = curr;
     }
 
     return ret;
@@ -171,19 +176,10 @@ pcb_t *headBlocked (semd_t *s) {
 
 
 #ifdef DEBUG
-semd_t *getSema(int i) {
-    return &SEMA_POOL[i];
-}
-
-semd_t *getASL() {
-    return ASL;
-}
-
-semd_t *getSemdFree() {
-    return semdFree;
-}
-
+semd_t *getSema(int i) {return &SEMA_POOL[i];}
+semd_t *getASL(void) {return ASL;}
+semd_t *getSemdFree(void) {return semdFree;}
 semd_t *getSNext(semd_t *s) { return s->s_next; }
-int *getSValue(semd_t *s) { return s->s_value; }
+int     getSValue(semd_t *s) { return s->s_value; }
 pcbq_t *getSProcQ(semd_t *s) { return s->s_procQ; }
 #endif
