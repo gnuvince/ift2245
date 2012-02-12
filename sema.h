@@ -23,7 +23,7 @@ typedef struct semd semd_t;
 void initASL (void);
 
 /* Initialize a new semaphore object `s'.  `val' is its initial value.  */
-void initSemD (semd_t *s, int val);
+int initSemD (semd_t *s, int val);
 
 /* Insert the process `p' at the tail of the queue of semaphore `s'.
    Add `s' to the ASL (active semaphore list), if not done yet.  */

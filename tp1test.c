@@ -313,7 +313,6 @@ int test_initASL(void) {
     int i;
     int success = 1;
     semd_t *s1, *s2;
-    pcbq_t *q;
 
     initASL();
 
@@ -322,9 +321,6 @@ int test_initASL(void) {
         s2 = getSema(i+1);
 
         success &= getSNext(s1) == s2;
-        success &= getSValue(s1) == 0;
-        q = getSProcQ(s1);
-        success &= emptyProcQ(q);
     }
     s1 = getSema(MAXPROCESS - 1);
     success &= getSNext(s1) == NULL;
@@ -341,10 +337,22 @@ int test_initSemD(void) {
 
     initASL();
 
-    s1 = getSema(0);
-    success &= getSValue(s1) == 0;
     initSemD(s1, 42);
     success &= getSValue(s1) == 42;
+
+    return success;
+}
+
+int test_initSemDExhaustion(void) {
+    int success = 1;
+    int i = 0;
+    semd_t *s;
+
+    initASL();
+
+    for (i = 0; i < MAXPROCESS; ++i)
+        success &= initSemD(s, i);
+    success &= !initSemD(s, MAXPROCESS);
 
     return success;
 }
@@ -520,6 +528,7 @@ int main(void) {
 
     test("test_initASL", test_initASL);
     test("test_initSemD", test_initSemD);
+    test("test_initSemDExhaustion", test_initSemDExhaustion);
     test("test_insertBlocked", test_insertBlocked);
     test("test_removeBlocked", test_removeBlocked);
     test("test_outBlocked", test_removeBlocked);

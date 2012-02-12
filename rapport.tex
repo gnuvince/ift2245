@@ -25,4 +25,88 @@ Dans ce travail, nous devions créer les structures de données
 nécessaires pour le fonctionnement du système d'exploitation Kaya
 ainsi que les différentes opérations sur ces structures.
 
+
+\section{Décisions techniques}
+
+\subsection{Terminaison d'un processus parent}
+
+Lorsque un processus possédant des enfants est terminé, il existe deux
+stratégies pour que les enfants ne soient pas orphelins:
+
+\begin{itemize}
+\item Terminer tous les enfants de façon récursive;
+\item Ajouter les enfants aux enfants de leur grand-parent.
+\end{itemize}
+
+Nous avons choisi d'implanter la première stratégie, car il s'agit de
+la stratégie la plus simple à implanter en code: dans la fonction
+\emph{removeChild}, on à simplement à faire des appels récursifs
+jusqu'à ce que le processus ne possède plus d'enfants.  Cela se fait
+en ajouter les deux lignes de code suivantes:
+
+\begin{verbatim}
+while (!emptyChild(child))
+    removeChild(child);
+\end{verbatim}
+
+(On fait de même dans la fonction \emph{outChild}.)
+
+
+\section{Stratégies de tests}
+
+Nous avons implanté une batterie complète de tests pour vérifier le
+comportement de nos fonctions.  Nous n'avons pas utilisé un
+``framework'' déjà existant, et avons opté pour un cadre ultra
+minimal.  Une fonction de test possède la signature {\tt void $\to$
+  int} où 0 signifie un échec et toute autre valeur signifie une
+réussite; cette stratégie ne permet pas de facilement déterminer
+quelles assertions dans la fonction de test ont échoué.  Une fonction
+nommée \emph{test} possédant la signature {\tt (string * (void $\to$
+  int)) $\to$ void} affiche si un test a réussi ou échoué.
+
+Pour exécuter les tests, il suffit d'exécuter la commande {\tt make
+  test}.
+
+\subsection{Blackbox testing}
+
+Pour les fonctions qui le permettent, nous avons utilisé une stratégie
+de ``blackbox testing'': nous n'examinons pas l'état interne des
+structures de données, mais vérifions uniquement si la sortie d'une
+fonction correspond à l'entrée qui lui a été donné\footnote{Nous
+  considérons l'environnement global comme étant un des paramètres
+  d'entrée.}.  Des fonctions telles que \emph{mkEmptyProcQ},
+\emph{emptyProcQ}, \emph{removeProcQ}, \emph{emptyChild} et
+\emph{headBlocked} se prêtent à ce genre de tests.
+
+\subsection{Whitebox testing}
+
+Dans les langages de programmation impératifs, certaines fonctions
+sont appelées pour leurs effets de bord et ne retourne pas de
+résultats utiles.  Par exemple, les fonctions \emph{initProc} et
+\emph{initASL} possèdent la signature {\tt void $\to$ void}.  Comme on
+ne peut rien vérifier de leur comportement externe, on utilise une
+stratégie de ``whitebox testing'' où nous examinons les changements
+que ces fonctions ont sur les différentes structures de données du
+système.  Cette stratégie de test est plus fragile que le ``blackbox
+testing'', car si la structure interne des objets est modifiée durant
+le développement du logiciel (par exemple: changement de nom ou de
+type d'un champ), ces tests doivent être mis à jour.
+
+Comme le contenu des structures de données de notre programme sont
+privées à leur unité de compilation, nous avons ajouté des fonctions
+accesseurs qui permettent d'aller chercher ces valeurs.  Ces fonctions
+ne sont compilées que si le symbole \emph{DEBUG} existe.
+
+\subsection{Résultats des tests}
+
+Les tests, en conjonction avec le débogueur gdb, ont été cruciaux dans
+l'écriture du logiciel.  Chaque fonction possède sa propre suite de
+tests, et les tests étaient exécutés constament durant le
+développement.  Lorsque une erreur était rencontrée, que ce soit un
+résultat incorrect ou une erreur de programmation (ex.: segmentation
+fault), il était facile et rapide de trouver l'endroit et la cause de
+l'échec du test.
+
+
+
 \end{document}

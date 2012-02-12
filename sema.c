@@ -27,26 +27,45 @@ static semd_t *semdFree;
 static semd_t SEMA_POOL[MAXPROC];
 
 
+int inList(semd_t *s, semd_t *list) {
+    semd_t *curr = list;
+    while (curr != NULL) {
+        if (curr == s)
+            return 1;
+        curr = curr->s_next;
+    }
+    return 0;
+}
+
+
 void initASL(void) {
     int i;
 
     for (i = 0; i < MAXPROC - 1; ++i) {
         SEMA_POOL[i].s_next = &SEMA_POOL[i+1];
-        SEMA_POOL[i].s_value = 0;
-        SEMA_POOL[i].s_procQ = mkEmptyProcQ();
     }
 
     SEMA_POOL[MAXPROC-1].s_next = NULL;
-    SEMA_POOL[MAXPROC-1].s_value = 0;
-    SEMA_POOL[MAXPROC-1].s_procQ = mkEmptyProcQ();
 
     semdFree = &SEMA_POOL[0];
     ASL = NULL;
 }
 
+/* Take a semd from semdFree and "give it" to s.  Return 0 if semd is
+ * empty. */
+int initSemD (semd_t *s, int val) {
+    if (semdFree != NULL) {
+        /* Get a semd from the free list. */
+        *s = *semdFree;
+        semdFree = semdFree->s_next;
 
-void initSemD (semd_t *s, int val) {
-    s->s_value = val;
+        /* Initialize it. */
+        s->s_procQ = mkEmptyProcQ();
+        s->s_value = val;
+        s->s_next = NULL;
+        return 1;
+    }
+    return 0;
 }
 
 
@@ -56,8 +75,7 @@ void insertBlocked (semd_t *s, pcb_t *p) {
     if (s == NULL || p == NULL)
         return;
 
-    /* If s's procQ is empty, s is not in ASL. */
-    if (emptyProcQ(s->s_procQ)) {
+    if (!inList(s, ASL)) {
         semd_t *curr = ASL;
         semd_t *prev = NULL;
 
