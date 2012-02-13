@@ -52,6 +52,33 @@ while (!emptyChild(child))
 (On fait de même dans la fonction \emph{outChild}.)
 
 
+\subsection{Classification des sémaphores}
+
+Beaucoup d'opérations sur les sémaphores dépendent de leur état
+actuel.  Il existe 3 états possible pour les sémaphores:
+
+\begin{itemize}
+\item Si une sémaphore est libre, sa procQ est vide et elle se trouve
+  dans la liste \emph{semdFree};
+\item Si une sémaphore vient d'être acquise par \emph{initSemd}, sa
+  procQ est vide, mais elle ne se trouve pas dans les listes
+  \emph{semdFree} ou \emph{ASL};
+\item Si une sémaphore possède des processus dans sa procQ, elle se
+  trouve dans la liste \emph{ASL}.
+\end{itemize}
+
+Afin de bien distinguer ses 3 états, nous avons introduit dans la
+structure \emph{semd\_t} le champ \emph{s\_state} qui contient l'une des
+trois valeurs suivantes: {\tt ST\_FREE}, {\tt ST\_ACQUIRED}, ou {\tt
+  ST\_ASL}.
+
+Ce champ permet de rapidement (temps constant) obtenir le statut d'une
+sémaphore, plutôt que de parcourir les listes \emph{semdFree} et
+\emph{ASL} et de vérifier le champ \emph{s\_procQ} (temps linéaire).
+De plus, cela exprime bien les trois états dans lequel une sémaphore
+peut se trouver, plutôt que d'espérer que le programmeur se rappelle
+des états possibles en examinant le code source.
+
 \section{Stratégies de tests}
 
 Nous avons implanté une batterie complète de tests pour vérifier le
