@@ -12,11 +12,16 @@ the Free Software Foundation, either version 3 of the License, or
 #include "proc.h"
 #include "sema.h"
 
+
+enum semd_state { ST_FREE, ST_ACQUIRED, ST_ASL };
+
 /* Semaphore descriptor.  */
 struct semd {
-   semd_t *s_next;		/* Next element on the ASL.  */
-   int     s_value;		/* Current value of the semaphore.  */
-   pcbq_t *s_procQ;		/* Queue of blocked processes.  */
+    semd_t *s_next;		/* Next element on the ASL.  */
+    int     s_value;		/* Current value of the semaphore.  */
+    pcbq_t *s_procQ;		/* Queue of blocked processes.  */
+
+    enum semd_state s_state;
 };
 
 /* The list of active semaphores,
@@ -27,25 +32,16 @@ static semd_t *semdFree;
 static semd_t SEMA_POOL[MAXPROC];
 
 
-int inList(semd_t *s, semd_t *list) {
-    semd_t *curr = list;
-    while (curr != NULL) {
-        if (curr == s)
-            return 1;
-        curr = curr->s_next;
-    }
-    return 0;
-}
-
-
 void initASL(void) {
     int i;
 
     for (i = 0; i < MAXPROC - 1; ++i) {
         SEMA_POOL[i].s_next = &SEMA_POOL[i+1];
+        SEMA_POOL[i].s_state = ST_FREE;
     }
 
     SEMA_POOL[MAXPROC-1].s_next = NULL;
+    SEMA_POOL[MAXPROC-1].s_state = ST_FREE;
 
     semdFree = &SEMA_POOL[0];
     ASL = NULL;
@@ -63,6 +59,7 @@ int initSemD (semd_t *s, int val) {
         s->s_procQ = mkEmptyProcQ();
         s->s_value = val;
         s->s_next = NULL;
+        s->s_state = ST_ACQUIRED;
         return 1;
     }
     return 0;
@@ -72,10 +69,10 @@ int initSemD (semd_t *s, int val) {
 /* Insert the pcb p into s's procQ.  If s was not in the ASL, insert
  * it by order of its value field. */
 void insertBlocked (semd_t *s, pcb_t *p) {
-    if (s == NULL || p == NULL)
+    if (s == NULL || p == NULL || s->s_state == ST_FREE)
         return;
 
-    if (!inList(s, ASL)) {
+    if (s->s_state == ST_ACQUIRED) {
         semd_t *curr = ASL;
         semd_t *prev = NULL;
 
@@ -103,6 +100,8 @@ void insertBlocked (semd_t *s, pcb_t *p) {
             s->s_next = curr;
             prev->s_next = s;
         }
+
+        s->s_state = ST_ASL;
     }
 
     /* Add the process p to s's procQ. */
@@ -119,7 +118,7 @@ pcb_t *removeBlocked (semd_t *s) {
     pcb_t *p = removeProcQ(&s->s_procQ);
 
     /* Remove s from ASL if its procQ is now empty. */
-    if (inList(s, ASL) && emptyProcQ(s->s_procQ)) {
+    if (s->s_state == ST_ASL && emptyProcQ(s->s_procQ)) {
         semd_t *curr = ASL;
         semd_t *prev = NULL;
         while (curr != NULL && curr != s) {
@@ -138,8 +137,9 @@ pcb_t *removeBlocked (semd_t *s) {
         }
 
         /* Return s to the semdFree list. */
-        curr->s_next = semdFree;
-        semdFree = curr;
+        s->s_next = semdFree;
+        s->s_state = ST_FREE;
+        semdFree = s;
     }
 
     return p;
@@ -167,7 +167,7 @@ pcb_t *outBlocked (pcb_t *p) {
 
     /* Remove p's containing semaphore from ASL if its procQ is now empty. */
     if (ret != NULL) {
-        if (inList(curr, ASL) && emptyProcQ(curr->s_procQ)) {
+        if (curr->s_state == ST_ASL && emptyProcQ(curr->s_procQ)) {
             if (prev == NULL) {
                 ASL = curr->s_next;
             }
@@ -176,6 +176,7 @@ pcb_t *outBlocked (pcb_t *p) {
             }
         }
         semdFree = curr;
+        curr->s_state = ST_FREE;
     }
 
     return ret;
