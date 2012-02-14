@@ -58,12 +58,12 @@ Beaucoup d'opérations sur les sémaphores dépendent de leur état
 actuel.  Il existe 3 états possible pour les sémaphores:
 
 \begin{itemize}
-\item Si une sémaphore est libre, sa procQ est vide et elle se trouve
+\item Si un sémaphore est libre, sa procQ est vide et elle se trouve
   dans la liste \emph{semdFree};
-\item Si une sémaphore vient d'être acquise par \emph{initSemd}, sa
+\item Si un sémaphore vient d'être acquise par \emph{initSemd}, sa
   procQ est vide, mais elle ne se trouve pas dans les listes
   \emph{semdFree} ou \emph{ASL};
-\item Si une sémaphore possède des processus dans sa procQ, elle se
+\item Si un sémaphore possède des processus dans sa procQ, elle se
   trouve dans la liste \emph{ASL}.
 \end{itemize}
 
@@ -72,12 +72,36 @@ structure \emph{semd\_t} le champ \emph{s\_state} qui contient l'une des
 trois valeurs suivantes: {\tt ST\_FREE}, {\tt ST\_ACQUIRED}, ou {\tt
   ST\_ASL}.
 
-Ce champ permet de rapidement (temps constant) obtenir le statut d'une
+Ce champ permet de rapidement (temps constant) obtenir le statut d'un
 sémaphore, plutôt que de parcourir les listes \emph{semdFree} et
 \emph{ASL} et de vérifier le champ \emph{s\_procQ} (temps linéaire).
-De plus, cela exprime bien les trois états dans lequel une sémaphore
+De plus, cela exprime bien les trois états dans lequel un sémaphore
 peut se trouver, plutôt que d'espérer que le programmeur se rappelle
 des états possibles en examinant le code source.
+
+\subsection{Indirection supplémentaire pour initSemD}
+
+Nous utilisons la fonction \emph{initSemD} afin de créer et
+d'initialiser un sémaphore dans le code client.  Comme la structure de
+\emph{semd\_t} est privée, il est impossible de créer un sémaphore à
+l'extérieur du module sema.c (e.g. sa taille est inconnue à la
+compilation).  Ainsi, nous avons modifié le prototype de
+\emph{initSemD} pour qu'il prenne non pas un pointeur vers un
+\emph{semd\_t}, mais un pointeur vers un pointeur vers un
+\emph{semd\_t}.  Cette stratégie nous permet de faire pointer une
+variable du code client vers un des descripteurs de sémaphore privés à
+sema.c.
+
+Voici comment utiliser \emph{initSemD} avec le nouveau prototype.
+
+\begin{verbatim}
+semd_t *s;
+if (initSemD(&s, 42))
+  term_puts("Acquisition de sémaphore réussie.\n");
+else
+  term_puts("Acquisition de sémaphore échouée.\n");
+\end{verbatim}
+
 
 \section{Stratégies de tests}
 
@@ -91,8 +115,10 @@ quelles assertions dans la fonction de test ont échoué.  Une fonction
 nommée \emph{test} possédant la signature {\tt (string * (void $\to$
   int)) $\to$ void} affiche si un test a réussi ou échoué.
 
-Pour exécuter les tests, il suffit d'exécuter la commande {\tt make
-  test}.
+Nous avons rajouté l'option {\tt -DDEBUG} au paramètre {\tt CFLAGS} du
+Makefile afin que nos fonctions accesseurs soient compilées et
+qu'elles puissent être désactivées facilement lorsque ces tests ne
+seront plus nécessaires.
 
 \subsection{Blackbox testing}
 
@@ -128,12 +154,20 @@ ne sont compilées que si le symbole \emph{DEBUG} existe.
 
 Les tests, en conjonction avec le débogueur gdb, ont été cruciaux dans
 l'écriture du logiciel.  Chaque fonction possède sa propre suite de
-tests, et les tests étaient exécutés constament durant le
+tests, et les tests étaient exécutés constamment durant le
 développement.  Lorsque une erreur était rencontrée, que ce soit un
 résultat incorrect ou une erreur de programmation (ex.: segmentation
 fault), il était facile et rapide de trouver l'endroit et la cause de
 l'échec du test.
 
+\section{Références}
+
+
+\begin{itemize}
+\item Michael Goldweber, Renzo Davoli. Student Guide to the Kaya
+  Operating System. Lulu Books, 2009
+  (\url{http://www.cs.unibo.it/~renzo/so/Kaya.pdf})
+\end{itemize}
 
 
 \end{document}
