@@ -1,3 +1,6 @@
+/* Vincent Foley-Bourgon (FOLV08078309)
+ * Eric Thivierge (THIE09016601) */
+
 #include "umps/libumps.h"
 #include "umps/arch.h"
 #include "umps/types.h"

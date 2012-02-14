@@ -1,3 +1,6 @@
+# Vincent Foley-Bourgon (FOLV08078309)
+# Eric Thivierge (THIE09016601)
+
 # Cross toolchain variables
 # If these are not in your path, you can make them absolute.
 XT_PRG_PREFIX = mipsel-linux-
@@ -28,7 +31,7 @@ all : kernel.core.umps
 kernel.core.umps : kernel
 	umps2-elf2umps -k $<
 
-kernel : tp1test2.o proc.o sema.o crtso.o libumps.o
+kernel : tp1test.o proc.o sema.o crtso.o libumps.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean :
