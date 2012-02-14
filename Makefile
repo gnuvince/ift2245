@@ -30,7 +30,7 @@ all : kernel.core.umps
 kernel.core.umps : kernel
 	umps2-elf2umps -k $<
 
-kernel : proc.o sema.o crtso.o libumps.o
+kernel : tp1test2.o proc.o sema.o crtso.o libumps.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean :
