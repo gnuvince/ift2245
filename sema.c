@@ -49,17 +49,17 @@ void initASL(void) {
 
 /* Take a semd from semdFree and "give it" to s.  Return 0 if semd is
  * empty. */
-int initSemD (semd_t *s, int val) {
+int initSemD (semd_t **s, int val) {
     if (semdFree != NULL) {
         /* Get a semd from the free list. */
-        *s = *semdFree;
+        *s = semdFree;
         semdFree = semdFree->s_next;
 
         /* Initialize it. */
-        s->s_procQ = mkEmptyProcQ();
-        s->s_value = val;
-        s->s_next = NULL;
-        s->s_state = ST_ACQUIRED;
+        (*s)->s_procQ = mkEmptyProcQ();
+        (*s)->s_value = val;
+        (*s)->s_next = NULL;
+        (*s)->s_state = ST_ACQUIRED;
         return 1;
     }
     return 0;
