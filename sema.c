@@ -112,7 +112,7 @@ void insertBlocked (semd_t *s, pcb_t *p) {
 
 /* Remove the head process from s's procQ and return it. */
 pcb_t *removeBlocked (semd_t *s) {
-    if (s == NULL)
+    if (s == NULL || s->s_state == ST_FREE || s->s_state == ST_ACQUIRED)
         return NULL;
 
     pcb_t *p = removeProcQ(&s->s_procQ);
@@ -175,6 +175,7 @@ pcb_t *outBlocked (pcb_t *p) {
                 prev->s_next = curr->s_next;
             }
         }
+        curr->s_next = semdFree;
         semdFree = curr;
         curr->s_state = ST_FREE;
     }
